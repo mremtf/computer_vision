@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS "-std=c++0x -Wall -Werror -g")
 add_executable(${PROJECT}_test test/tests.cpp)
 target_link_libraries(${PROJECT}_test ${GTEST_LIBRARIES} pthread)
 
-add_executable(${PROJECT} src/gaussian_pryamid.cpp)
+add_executable(${PROJECT} src/main.cpp src/gaussian_pryamid.cpp)
 
 enable_testing()
 add_test(NAME    ${PROJECT}_test 
