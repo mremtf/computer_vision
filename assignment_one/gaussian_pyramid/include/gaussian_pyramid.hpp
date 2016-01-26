@@ -16,8 +16,9 @@ class gaussian_pyramid {
 	public:
 	gaussian_pyramid(kernel_parameters& parameters);
 	~gaussian_pyramid();
+		
+	bool build_pyramid(cv::Mat& image, size_t levels,std::vector<cv::Mat>& outImages); 
 	protected:
-	bool build_pyramid(cv::Mat& image, size_t levels,std::vector<cv::Mat>& outImage) 
 
 	private:
 	kernel_parameters parameters;
