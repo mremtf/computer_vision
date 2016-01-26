@@ -35,7 +35,7 @@ bool gaussian_pyramid::build_pyramid(cv::Mat& image, size_t levels,std::vector<c
 		cv::Size2i dsize(src_width >> 1,src_height >> 1);
 		// down sample the image using resize
 		std::cout << "downsampled size" << dsize << std::endl;
-		resize(dst, src, dsize); 
+		resize(dst, src, dsize, cv::INTER_NEAREST); 
 	}
 	return true;
 }
