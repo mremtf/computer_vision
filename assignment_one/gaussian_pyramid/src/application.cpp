@@ -58,6 +58,20 @@ int main (int argc, char** argv) {
 		imwrite( str.c_str(), *current );
 		ss.str(std::string());	
   }
+	/*cv::Mat dst;
+	cv::buildPyramid(image, dst,levels);
+	int i = 0;
+	current = sampled_imgs.begin();
+	for (; i < dst.channels() || current != v_end; ++i) {
+		// Get a matrix with non-zero values at points where the 
+		// two matrices have different values
+		
+utImg.ptr<uchar>(b, a)[0]
+		cv::Mat diff = dst<image.depth()>[i] != *current;
+		// Equal if no elements disagree
+		if(!(cv::countNonZero(diff) == 0))
+			std::cout << "different at level " << i << std::endl; 
+	}*/
 	
 	return 0;	
 }

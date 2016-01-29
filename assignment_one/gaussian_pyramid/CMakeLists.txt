@@ -3,6 +3,10 @@ project(gaussian_pyramid)
 find_package(OpenCV REQUIRED)
 set(CMAKE_CXX_FLAGS "-std=c++0x -Wall -Werror -g")
 add_executable(gp src/application.cpp src/gaussian_pyramid.cpp)
-target_link_libraries(gp ${OpenCV_LIBS}) 
+target_link_libraries(gp ${OpenCV_LIBS})
+
+#add_executable(gp_test src/g_pyramid.cpp)
+#target_link_libraries(gp_test ${OpenCV_LIBS})
+
 
 
