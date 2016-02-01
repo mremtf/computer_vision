@@ -4,8 +4,14 @@ The code will create a gaussian pyramid over an input image
 REQUIREMENTS:
 
 Needs cmake application to build the 
+C++ 11 libraries
 
 Use makefile to build gaussian pyramid application
+
+The application is located in the build/ folder
+the application is called gp
+
+the test files are located in ../data/lena.jpg and ../data/zebra.jpb
 
 USAGE:
 ./gp <input image> <num levels> <kernel size> <sigma>

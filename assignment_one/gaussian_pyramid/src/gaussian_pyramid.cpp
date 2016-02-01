@@ -92,12 +92,16 @@ cv::Mat getGaussianKernel(size_t k_size, double sigma){
 		gaussian_kernel = gaussian_kernel*1.0/256;	
 	}
 	else {
+		double total_weight = 0;
 		for (auto r = 0; r < gaussian_kernel.rows; ++r) {
 			for (auto c = 0; c < gaussian_kernel.cols; ++c) {
-				const double val = (1.0/(2.0*M_PI*(sigma*sigma)))*exp(-(((r*r) - (c*c))/(2*(sigma*sigma))));
-				gaussian_kernel.at<double>(r,c) = val;	
+				const double val = (1.0/(2*M_PI*(sigma*sigma)))*exp(-((c*c) - (r*r))/(2*(sigma*sigma)));
+				//std::cout << val << " " << std::endl;
+				gaussian_kernel.at<double>(c,r) = val;	
+				total_weight += val;
 			}
 		}	
+  	gaussian_kernel = gaussian_kernel/total_weight;	
 	}
 	//std::cout << gaussian_kernel << std::endl;
 	return gaussian_kernel;
