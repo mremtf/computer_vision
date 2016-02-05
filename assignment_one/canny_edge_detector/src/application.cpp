@@ -141,29 +141,29 @@ int main( int argc, char** argv )
   for (auto r = 1; r < nms.rows - 1; r++) {
   	for (auto c = 1; c < nms.cols - 1; c++) {
 
-			const float dir = (float)(fmod(atan2(dy.at<short>(r,c),
-                                                 dx.at<short>(r,c)) + M_PI,
-                                           M_PI) / M_PI) * 8;
-				// check current vs east and west
-				if ((dir <= 1 && dir > 7) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r,c + 1) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r,c - 1)) {
-					nms.at<uchar>(r,c) = magnitude.at<uchar>(r,c);
-				}
-				// check south east and north west
-				else if ((dir > 1 && dir <= 3) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r + 1, c + 1) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r - 1 ,c - 1)) {
-					nms.at<uchar>(r,c) = magnitude.at<uchar>(r,c);
-				}
-				// check north and south
-				else if ((dir > 3 && dir <= 5) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r - 1,c) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r + 1,c)) {
-					nms.at<uchar>(r,c) = magnitude.at<uchar>(r,c);
-
-				}
-				// check north east and south west
-				else if ((dir > 5 && dir <= 7) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r - 1,c + 1) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r + 1,c - 1)) {
-					nms.at<uchar>(r,c) = magnitude.at<uchar>(r,c);
-				}
-				else {
-					nms.at<uchar>(r,c) = 0;	
-				}	
+			float dir = atan2(dy.at<short>(r,c),dx.at<short>(r,c));
+			if (dir < 0) {
+				dir += M_PI;
+			}
+    	// check current vs east and west
+			if (dir <= 0 && dir <= M_PI/4 && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r,c + 1) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r,c - 1)) {
+				nms.at<uchar>(r,c) = magnitude.at<uchar>(r,c);
+			}
+			// check south east and north west
+			else if (dir > M_PI/4 && dir <= M_PI/2 && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r + 1, c + 1) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r - 1 ,c - 1)) {
+				nms.at<uchar>(r,c) = magnitude.at<uchar>(r,c);
+			}
+			// check north and south
+			else if (dir > M_PI/2 && dir <= (2*M_PI)/3 && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r - 1,c) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r + 1,c)) {
+				nms.at<uchar>(r,c) = magnitude.at<uchar>(r,c);
+			}
+			// check north east and south west
+			else if (dir > (2*M_PI)/3 && dir <= M_PI && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r - 1,c + 1) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r + 1,c - 1)) {
+				nms.at<uchar>(r,c) = magnitude.at<uchar>(r,c);
+			}
+			else {
+				nms.at<uchar>(r,c) = 0;	
+			}	
 		}
 	}
 

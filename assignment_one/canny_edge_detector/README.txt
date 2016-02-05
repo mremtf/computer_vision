@@ -4,6 +4,8 @@
 
 # location of executable
 Stored in bin and build
+# test files located in 
+data/ 
 
 # Usage 
 input image: the image to apply the canny edge detector 
