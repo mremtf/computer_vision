@@ -4,22 +4,71 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
+#include <cmath>
+#include <queue>
 
 #define RAD2DEG(x) (180 *(x) / M_PI)
 
+
+cv::Mat hysteresis (cv::Mat& gradient, unsigned int threshold_low, unsigned int threshold_high) {
+	std::queue<std::pair<int32_t,int32_t> > nodes;
+	cv::Mat out = cv::Mat::zeros(gradient.rows,gradient.cols,CV_8UC1);
+	std::cout << out.size() << std::endl;
+	std::cout << gradient.size() << std::endl;
+	for (int32_t r = 0; r < out.rows; ++r) {
+		for (int32_t c = 0; c < out.cols; ++c) {
+			//std::cout << gradient.at<uchar>(r,c) << std::endl;
+			if ((gradient.at<uchar>(r,c) >= threshold_high) && out.at<uchar>(r,c) != 255) {
+				nodes.push(std::pair<int32_t,int32_t>(r,c));
+				while (!nodes.empty()) {
+					std::pair<int32_t,int32_t> node = nodes.front();
+					nodes.pop();
+					int32_t row = node.first;
+					int32_t col = node.second;
+					
+					if (col < 0 || col >= out.rows || row < 0 || row >= out.cols) {
+						continue;
+					}
+					if (gradient.at<uchar>(row,col) < threshold_low) {
+						continue;
+					}
+					if (out.at<uchar>(row,col) != 255) {
+						out.at<uchar>(row,col) = 255;
+
+						nodes.push(std::pair<int32_t,int32_t>(row-1,col-1));
+						nodes.push(std::pair<int32_t,int32_t>(row-1,col ));
+						nodes.push(std::pair<int32_t,int32_t>(row-1,col+1));
+						
+						nodes.push(std::pair<int32_t,int32_t>(row ,col+1));
+						nodes.push(std::pair<int32_t,int32_t>(row ,col-1));
+
+						nodes.push(std::pair<int32_t,int32_t>(row+1,col-1));
+						nodes.push(std::pair<int32_t,int32_t>(row+1,col ));	
+						nodes.push(std::pair<int32_t,int32_t>(row+1,col+1));
+					}
+
+				}
+			}
+		}
+	}
+
+	return out;
+}
+
 int main( int argc, char** argv )
 {
-	if (argc != 2) {
-		std::cout << argv[0] << "<input image>" << std::endl;
+	if (argc != 4) {
+		std::cout << argv[0] << "<input image> <min threshold> <max threshold>" << std::endl;
 		return -1;
 	}
   cv::Mat src, src_gray;
   cv::Mat grad;
-  const char* window_name = "Sobel Demo - Simple Edge Detector";
+  const char* window_name = "Result";
   int scale = 1;
   int delta = 0;
   int ddepth = CV_16S;
-
+	int t_low = atoi(argv[2]);
+	int t_high = atoi(argv[3]);
   /// Load an image
   src = cv::imread( argv[1] );
 
@@ -59,46 +108,55 @@ int main( int argc, char** argv )
 			const short dxVal = dx.at<short>(r,c);
 			const short dyVal = dy.at<short>(r,c);
 			magnitude.at<uchar>(r,c) =  sqrt( dxVal * dxVal + dyVal * dyVal);
-			orientation.at<short>(r,c) = RAD2DEG(atan2( dyVal , dxVal )) + 180;
 		}
 	}
 
   // Non-maximum suppression, straightforward implementation.
-  /*for (int i = 1; i < nx - 1; i++) {
-  	for (int j = 1; j < ny - 1; j++) {
-     	const int c = i + nx * j;
-      const int nn = c - nx;
-			const int ss = c + nx;
-			const int ww = c + 1;
-			const int ee = c - 1;
-			const int nw = nn + 1;
-			const int ne = nn - 1;
-			const int sw = ss + 1;
-			const int se = ss - 1;
- 
-			const float dir = (float)(fmod(atan2(after_Gy[c],
-                                                 after_Gx[c]) + M_PI,
-                                           M_PI) / M_PI) * 8;
- 
-			if (((dir <= 1 || dir > 7) && G[c] > G[ee] &&
-				G[c] > G[ww]) || // 0 deg
-				((dir > 1 && dir <= 3) && G[c] > G[nw] &&
- 				G[c] > G[se]) || // 45 deg
-				((dir > 3 && dir <= 5) && G[c] > G[nn] &&
-				G[c] > G[ss]) || // 90 deg
-				((dir > 5 && dir <= 7) && G[c] > G[ne] &&
-				G[c] > G[sw]))   // 135 deg
- 					nms[c] = G[c];
-			else
- 				nms[c] = 0;
-		}
-	}	*/
-	//std::cout << mag << std::endl;	
-	std::cout << orientation << std::endl;
-  /// Total Gradient (approximate)
-  //cv::addWeighted( abs_grad_x, 0.5, abs_grad_y, 0.5, 0, grad );
+	cv::Mat nms (src_gray.rows,src_gray.cols,CV_8UC1);
 
-  cv::imshow ( window_name, src);
+  for (auto r = 1; r < nms.rows - 1; r++) {
+  	for (auto c = 1; c < nms.cols - 1; c++) {
+
+			const float dir = (float)(fmod(atan2(dy.at<short>(r,c),
+                                                 dx.at<short>(r,c)) + M_PI,
+                                           M_PI) / M_PI) * 8;
+				// check current vs east and west
+				if ((dir <= 1 && dir > 7) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r,c + 1) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r,c - 1)) {
+					nms.at<uchar>(r,c) = magnitude.at<uchar>(r,c);
+				}
+				else {
+						nms.at<uchar>(r,c) = 0;	
+				}
+				// check south east and north west
+				if ((dir > 1 && dir <= 3) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r + 1, c + 1) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r - 1 ,c - 1)) {
+					nms.at<uchar>(r,c) = magnitude.at<uchar>(r,c);
+				}
+				else {
+					nms.at<uchar>(r,c) = 0;	
+
+				}
+				// check north and south
+				if ((dir > 3 && dir <= 5) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r - 1,c) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r + 1,c)) {
+					nms.at<uchar>(r,c) = magnitude.at<uchar>(r,c);
+
+				}
+				else {
+						nms.at<uchar>(r,c) = 0;	
+
+				}
+				// check north east and south west
+				if ((dir > 5 && dir <= 7) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r - 1,c + 1) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r + 1,c - 1)) {
+					nms.at<uchar>(r,c) = magnitude.at<uchar>(r,c);
+				}
+				else {
+					nms.at<uchar>(r,c) = 0;	
+				}	
+		}
+	}
+
+	cv::Mat out = hysteresis(nms,t_low, t_high); 
+
+  cv::imshow ( window_name, out);
 	//cv::imshow( "orientation img", )
 
   cv::waitKey(0);
