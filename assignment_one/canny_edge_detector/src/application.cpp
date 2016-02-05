@@ -124,28 +124,17 @@ int main( int argc, char** argv )
 				if ((dir <= 1 && dir > 7) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r,c + 1) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r,c - 1)) {
 					nms.at<uchar>(r,c) = magnitude.at<uchar>(r,c);
 				}
-				else {
-						nms.at<uchar>(r,c) = 0;	
-				}
 				// check south east and north west
-				if ((dir > 1 && dir <= 3) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r + 1, c + 1) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r - 1 ,c - 1)) {
+				else if ((dir > 1 && dir <= 3) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r + 1, c + 1) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r - 1 ,c - 1)) {
 					nms.at<uchar>(r,c) = magnitude.at<uchar>(r,c);
-				}
-				else {
-					nms.at<uchar>(r,c) = 0;	
-
 				}
 				// check north and south
-				if ((dir > 3 && dir <= 5) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r - 1,c) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r + 1,c)) {
+				else if ((dir > 3 && dir <= 5) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r - 1,c) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r + 1,c)) {
 					nms.at<uchar>(r,c) = magnitude.at<uchar>(r,c);
-
-				}
-				else {
-						nms.at<uchar>(r,c) = 0;	
 
 				}
 				// check north east and south west
-				if ((dir > 5 && dir <= 7) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r - 1,c + 1) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r + 1,c - 1)) {
+				else if ((dir > 5 && dir <= 7) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r - 1,c + 1) && magnitude.at<uchar>(r,c) > magnitude.at<uchar>(r + 1,c - 1)) {
 					nms.at<uchar>(r,c) = magnitude.at<uchar>(r,c);
 				}
 				else {
