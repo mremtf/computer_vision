@@ -27,7 +27,7 @@ int main (int argc, char** argv) {
 	cv::blur( src, img_blurred, cv::Size(5,5) );
 	cv::Canny(img_blurred, img_edges, 100, 150, 3);
 
-	hough_transform ht;
+	hough_transform ht(img_edges.size());
 	ht.transform(img_edges,250);
 
 

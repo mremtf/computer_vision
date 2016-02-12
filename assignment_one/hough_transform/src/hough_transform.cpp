@@ -26,7 +26,7 @@
 */
 
 
-hough_transform::hough_transform(cv::Size2i& img_dims) {
+hough_transform::hough_transform(cv::Size img_dims) {
 	this->_accu.accumulator = nullptr;
 	this->_accu.width = 0;
 	this->_accu.height = 0;
@@ -74,25 +74,25 @@ int hough_transform::transform(cv::Mat& img, uint8_t edge_threshold) {
 }
 
 std::vector<std::pair<cv::Point,cv::Point> > hough_transform::find_lines(size_t threshold, ssize_t local_maximum_radius) {
-	std::vector<std::pair<cv::Point,cv::Point> > points;
+	std::vector<std::pair<cv::Point,cv::Point> > lines;
 	if (this->_accu.accumulator) {
-		return points;
+		return lines;
 	}
 	
 	/* apply a threshold restriction on the accumulator values
 		 convert from polar to cartesian
 	*/
-	for (auto r = 0; r < this->accu.height; ++r) {
-		for (auto c = 0; c < this->accu.width; ++c) {
-			if (this->_accu.accumulator[(r*this->_accu_width) + c] >= threshold) {
-				auto max = this->_accu.accumulator[(r*this->_accu_width) + c];
+	for (unsigned int r = 0; r < this->_accu.height; ++r) {
+		for (unsigned int  c = 0; c < this->_accu.width; ++c) {
+			if (this->_accu.accumulator[(r*this->_accu.width) + c] >= threshold) {
+				auto max = this->_accu.accumulator[(r*this->_accu.width) + c];
 				// voting for local maximum
 				for (auto lr = -local_maximum_radius; lr <= local_maximum_radius; ++lr) {
 					for (auto lc = -local_maximum_radius; lc <= local_maximum_radius; ++lc) {
 						// valid index 
 						if (lr + r >= 0 && lc+c >=0 && lr+r < this->_accu.height && lc+c < this->_accu.width) {
 							// look for max value
-							auto val = this->_accu.accumulator[((r + lr) *this->_accu.width) + (c + lc)] 
+							auto val = this->_accu.accumulator[((r + lr) *this->_accu.width) + (c + lc)]; 
 							if ( val > max) {
 								max = val;
 								lr = lc = 5; // escape the local search window
@@ -101,7 +101,7 @@ std::vector<std::pair<cv::Point,cv::Point> > hough_transform::find_lines(size_t 
 					}
 				}
 				
-				if (max > this->_accu.accumulator[(r*this->_accu_width) + c]) {
+				if (max > this->_accu.accumulator[(r*this->_accu.width) + c]) {
 					continue; // we found a new maximum, move to the next bucket	
 				}
 
@@ -116,9 +116,9 @@ std::vector<std::pair<cv::Point,cv::Point> > hough_transform::find_lines(size_t 
 
 				else {	
 					p1.y = 0;
-					p1.x = ((double)(r-(this->_accu.height/2)) - ((p1.y - (_this->img_dims.height/2) ) * sin(c * DEGREE2RADIAN))) / cos(c * DEG2RAD) + (this->img_dims.width / 2); 
+					p1.x = ((double)(r-(this->_accu.height/2)) - ((p1.y - (this->img_dims.height/2) ) * sin(c * DEGREE2RADIAN))) / cos(c * DEGREE2RADIAN) + (this->img_dims.width / 2); 
 					p2.y = this->img_dims.width - 0;
-					p2.x = ((double)(r-(this->_accu.height/2)) - ((p2.y - (_this->img_dims.height/2) ) * sin(c * DEGREE2RADIAN))) / cos(c * DEG2RAD) + (this->img_dims.width / 2);
+					p2.x = ((double)(r-(this->_accu.height/2)) - ((p2.y - (this->img_dims.height/2) ) * sin(c * DEGREE2RADIAN))) / cos(c * DEGREE2RADIAN) + (this->img_dims.width / 2);
 				}
 				lines.push_back(std::make_pair(p1,p2));
 			}			
