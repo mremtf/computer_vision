@@ -18,7 +18,7 @@ class hough_transform{
 		
 		int transform(cv::Mat& img, uint8_t edge_threshold);
 		std::vector<std::pair<cv::Point,cv::Point> > find_lines(size_t threshold, ssize_t local_maximum_radius);
-		const Accumulator accumlator(size_t width, size_t height);
+		const Accumulator accumulator();
 		
 	private:
 		cv::Mat _img;

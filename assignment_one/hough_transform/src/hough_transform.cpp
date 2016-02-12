@@ -73,6 +73,7 @@ std::vector<std::pair<cv::Point,cv::Point> > hough_transform::find_lines(size_t 
 		for (unsigned int  c = 0; c < this->_accu.width; ++c) {
 			if (this->_accu.accumulator[(r*this->_accu.width) + c] >= threshold) {
 				auto max = this->_accu.accumulator[(r*this->_accu.width) + c];
+				bool local_max_found = false;
 				// voting for local maximum
 				for (auto lr = -local_maximum_radius; lr <= local_maximum_radius; ++lr) {
 					for (auto lc = -local_maximum_radius; lc <= local_maximum_radius; ++lc) {
@@ -83,18 +84,24 @@ std::vector<std::pair<cv::Point,cv::Point> > hough_transform::find_lines(size_t 
 							if ( val > max) {
 								max = val;
 								lr = lc = 5; // escape the local search window
+								local_max_found = true;
 							}	
+							else if (val == max) {
+								if (lc == 0 && lr == 0) {
+									continue;
+								}
+							}
 						}	
 					}
 				}
-				
-				if (max > this->_accu.accumulator[(r*this->_accu.width) + c]) {
-					continue; // we found a new maximum, move to the next bucket	
-				}
+				if (local_max_found) {
+					continue;
+				}				
 
 				cv::Point p1, p2;
 				// convert back into cartesian points
 				if (c >= 45 && c <= 135) {
+					// //y = (r - x cos(t)) / sin(t)
 					p1.x = 0;
 					p1.y = ((double)(r-(this->_accu.height/2)) - ((p1.x - (this->img_dims.width/2) ) * cos(c * DEGREE2RADIAN))) / sin(c * DEGREE2RADIAN) + (this->img_dims.height / 2);
 					p2.x = this->img_dims.width - 0;
@@ -102,9 +109,10 @@ std::vector<std::pair<cv::Point,cv::Point> > hough_transform::find_lines(size_t 
 				}
 
 				else {	
+					// //x = (r - y sin(t)) / cos(t)
 					p1.y = 0;
 					p1.x = ((double)(r-(this->_accu.height/2)) - ((p1.y - (this->img_dims.height/2) ) * sin(c * DEGREE2RADIAN))) / cos(c * DEGREE2RADIAN) + (this->img_dims.width / 2); 
-					p2.y = this->img_dims.width - 0;
+					p2.y = this->img_dims.height - 0;
 					p2.x = ((double)(r-(this->_accu.height/2)) - ((p2.y - (this->img_dims.height/2) ) * sin(c * DEGREE2RADIAN))) / cos(c * DEGREE2RADIAN) + (this->img_dims.width / 2);
 				}
 				lines.push_back(std::make_pair(p1,p2));
@@ -116,7 +124,7 @@ std::vector<std::pair<cv::Point,cv::Point> > hough_transform::find_lines(size_t 
 	return lines;
 }
 
-const Accumulator hough_transform::accumlator(size_t width, size_t height) {
+const Accumulator hough_transform::accumulator() {
 	return this->_accu;
 }
 
