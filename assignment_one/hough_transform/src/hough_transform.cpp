@@ -9,22 +9,6 @@
 #include "hough_transform.hpp"
 
 #define DEGREE2RADIAN 0.017f
-// functions prototypes
-/*		HoughTransform();
-		~HoughTransform();
-		
-		int Transform(cv::Mat& img);
-		std::vector<cv::Point> find_lines(size_t threshold);
-		const Accumulator accumlator(size_t width, size_t height);
-		
-	private:
-		cv::Mat img;
-		Acculator accumlator;
-	unsigned int* accumulator;
-	unsigned int width;
-	unsigned int height;
-*/
-
 
 hough_transform::hough_transform(cv::Size img_dims) {
 	this->_accu.accumulator = nullptr;
@@ -55,16 +39,19 @@ int hough_transform::transform(cv::Mat& img, uint8_t edge_threshold) {
 
 	this->_accu.accumulator = new unsigned int[this->_accu.height * this->_accu.width]();
 
+	double center_row = height/2;
+	double center_col = width/2;
+
 	// loop through image and calculate the polar coordinates of the image
 	for (auto r = 0; r < img.rows; ++r) {
 		for (auto c = 0; c < img.cols; ++c) {
 			// Is this a valid edge to use
 			if (img.at<uchar>(r,c) > edge_threshold) {
 				for (auto t = 0; t < 180; ++t) {
-					//double r = ( ((double)x - center_x) * cos((double)t * DEG2RAD)) + (((double)y - center_y) * sin((double)t * DEG2RAD));
+					double pc = ( ((double)c - center_col) * cos((double)t * DEGREE2RADIAN)) + (((double)r - center_row) * sin((double)t * DEGREE2RADIAN));
 					// calculate polar coordinate and bucket into hough space
-					double r = ( ((double)c) * cos((double)t * DEGREE2RADIAN)) + (((double)r) * sin((double)t * DEGREE2RADIAN));
-					this->_accu.accumulator[(unsigned int) (std::round(r + this->_accu.height) * 180) + t]++;
+					//double r = ( ((double)c) * cos((double)t * DEGREE2RADIAN)) + (((double)r) * sin((double)t * DEGREE2RADIAN));
+					this->_accu.accumulator[(int) ((std::round(pc + hough_height) * 180.0)) + t]++;
 				}	
 			}
 		}
@@ -75,7 +62,7 @@ int hough_transform::transform(cv::Mat& img, uint8_t edge_threshold) {
 
 std::vector<std::pair<cv::Point,cv::Point> > hough_transform::find_lines(size_t threshold, ssize_t local_maximum_radius) {
 	std::vector<std::pair<cv::Point,cv::Point> > lines;
-	if (this->_accu.accumulator) {
+	if (this->_accu.accumulator == nullptr) {
 		return lines;
 	}
 	
