@@ -50,7 +50,7 @@ int hough_transform::transform(cv::Mat& img, uint8_t edge_threshold) {
 	for (unsigned r = 0; r < height; r++) {
 		for (unsigned c = 0; c < width; c++) {
 			// Is this a valid edge to use
-			if (img_data[(r * width) + c] > 250 ) {
+			if (img_data[(r * width) + c] > edge_threshold) {
 				for (unsigned t = 0; t < 180; t++) {
 					double pc = ( ((double)c - center_col) * cos((double)t * DEGREE2RADIAN)) + (((double)r - center_row) * sin((double)t * DEGREE2RADIAN));
 					// calculate polar coordinate and bucket into hough space
@@ -78,15 +78,15 @@ std::vector<std::pair<cv::Point,cv::Point> > hough_transform::find_lines(size_t 
 			if (this->_accu.accumulator[(r*this->_accu.width) + c] >= threshold) {
 				unsigned max = this->_accu.accumulator[(r*this->_accu.width) + c];
 				// voting for local maximum
-				for (int lr = -4; lr <= 4; lr++) {
-					for (int lc = -4; lc <= 4; lc++) {
+				for (int lr = -local_maximum_radius; lr <= local_maximum_radius; lr++) {
+					for (int lc = -local_maximum_radius; lc <= local_maximum_radius; lc++) {
 						// valid index 
 						if (((int) (lr + r) >= 0 && (int) (lr+r) < this->_accu.height) && ((int) (lc+c) >=0 && (int) (lc+c) < this->_accu.width )) {
 							// look for max value
 							unsigned val = this->_accu.accumulator[((r + lr) *this->_accu.width) + (c + lc)]; 
 							if ( val > max) {
 								max = val;
-								lr = lc = 5; // escape the local search window
+								lr = lc = local_maximum_radius + 1; // escape the local search window
 							}	
 						}	
 					}
