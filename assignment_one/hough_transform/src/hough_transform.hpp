@@ -3,7 +3,9 @@
 
 #include <vector>
 #include <cstdint>
-
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
 struct Accumulator {
 	unsigned int* accumulator;
 	unsigned int width;
@@ -20,7 +22,7 @@ class hough_transform{
 		std::vector<std::pair<cv::Point,cv::Point> > find_lines(size_t threshold, ssize_t local_maximum_radius);
 		const Accumulator accumulator();
 		
-	private:
+	protected:
 		cv::Mat _img;
 		Accumulator _accu;
 		cv::Size img_dims;

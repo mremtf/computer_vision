@@ -1,6 +1,7 @@
 #include <iostream>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp>
 #include <opencv/cv.h>
 #include <cstdlib>
 #include "hough_transform.hpp"
@@ -23,16 +24,16 @@ int main (int argc, char** argv) {
   /// Load an image
 	cv::Mat src = cv::imread( argv[1], 1);
 
-	cv::Mat src_gray = src;
+	//cv::Mat src_gray = src;
 	/// Convert it to gray to 1 channel image
   //cv::cvtColor( src, src_gray, cv::COLOR_RGB2GRAY );
 
-  if( src_gray.empty() )
+  /*if( src_gray.empty() )
   { 
 		std::cout << "FAILED TO OPEN FILE" << std::endl;
 		return -1; 
 		
-	}
+	}*/
 
 	/*if (src_gray.channels() != 1) {
 		std::cout << "ERROR failed to convert to 1 channel image" << std::endl;
@@ -41,7 +42,7 @@ int main (int argc, char** argv) {
 	cv::Mat img_blurred;
 	cv::Mat img_edges;	
 	cv::Mat img_res = src.clone();
-	cv::blur( src_gray, img_blurred, cv::Size(3,3) );
+	cv::blur( src, img_blurred, cv::Size(5,5) );
 	cv::Canny(img_blurred, img_edges, 100, 150, 3);
 
 	if (img_edges.channels() != 1) {
@@ -59,8 +60,8 @@ int main (int argc, char** argv) {
 	std::cout << "LINES SIZE " << lines.size() << std::endl;
 	std::vector<std::pair<cv::Point,cv::Point> >::iterator it;
 	it = lines.begin();
-	for (; it != lines.end(); ++it) {
-		cv::line(img_res,it->second,it->first, cv::Scalar(0,0,255), 2,8);
+	for (; it != lines.end(); it++) {
+		cv::line(img_res,it->first,it->second, cv::Scalar(0,0,255), 2,8);
 	}
 
 	Accumulator accum = ht.accumulator();
