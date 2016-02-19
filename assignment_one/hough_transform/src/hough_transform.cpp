@@ -8,7 +8,7 @@
 
 #include "hough_transform.hpp"
 
-#define DEGREE2RADIAN 0.017f
+#define DEGREE2RADIAN 0.017453293f
 
 hough_transform::hough_transform(cv::Size img_dims) {
 	this->_accu.accumulator = nullptr;
@@ -38,24 +38,26 @@ int hough_transform::transform(cv::Mat& img, uint8_t edge_threshold) {
 	this->_accu.height = hough_height * 2.0;
 
 	this->_accu.accumulator = new unsigned int[this->_accu.height * this->_accu.width]();
+	std::fill( this->_accu.accumulator, this->_accu.accumulator + (this->_accu.height * this->_accu.width), 0 );
 
 	double center_row = height/2;
 	double center_col = width/2;
 
 	// loop through image and calculate the polar coordinates of the image
-	for (auto r = 0; r < img.rows; ++r) {
-		for (auto c = 0; c < img.cols; ++c) {
+	for (unsigned r = 0; r < img.rows; ++r) {
+		for (unsigned c = 0; c < img.cols; ++c) {
 			// Is this a valid edge to use
-			if (img.at<uchar>(r,c) > edge_threshold) {
-				for (auto t = 0; t < 180; ++t) {
+			if (img.at<uchar>(r,c) >= edge_threshold ) {
+				for (int t = 0; t < 180; ++t) {
 					double pc = ( ((double)c - center_col) * cos((double)t * DEGREE2RADIAN)) + (((double)r - center_row) * sin((double)t * DEGREE2RADIAN));
 					// calculate polar coordinate and bucket into hough space
-					//double r = ( ((double)c) * cos((double)t * DEGREE2RADIAN)) + (((double)r) * sin((double)t * DEGREE2RADIAN));
-					this->_accu.accumulator[(int) ((std::round(pc + hough_height) * 180.0)) + t]++;
+					const unsigned idx = ((std::round(pc + hough_height) * 180.0)) + t;
+					this->_accu.accumulator[idx]++;
 				}	
 			}
 		}
 	}
+
 	
 	return 0;	
 }
@@ -72,15 +74,15 @@ std::vector<std::pair<cv::Point,cv::Point> > hough_transform::find_lines(size_t 
 	for (unsigned int r = 0; r < this->_accu.height; ++r) {
 		for (unsigned int  c = 0; c < this->_accu.width; ++c) {
 			if (this->_accu.accumulator[(r*this->_accu.width) + c] >= threshold) {
-				auto max = this->_accu.accumulator[(r*this->_accu.width) + c];
+				unsigned max = this->_accu.accumulator[(r*this->_accu.width) + c];
 				bool local_max_found = false;
 				// voting for local maximum
-				for (auto lr = -local_maximum_radius; lr <= local_maximum_radius; ++lr) {
-					for (auto lc = -local_maximum_radius; lc <= local_maximum_radius; ++lc) {
+				for (int lr = -local_maximum_radius; lr <= local_maximum_radius; lr++) {
+					for (int lc = -local_maximum_radius; lc <= local_maximum_radius; lc++) {
 						// valid index 
-						if (lr + r >= 0 && lc+c >=0 && lr+r < this->_accu.height && lc+c < this->_accu.width) {
+						if (((int) (lr + r) >= 0 && (int) (lr+r) < this->_accu.height) && ((int) (lc+c) >=0 && (int) (lc+c) < this->_accu.width )) {
 							// look for max value
-							auto val = this->_accu.accumulator[((r + lr) *this->_accu.width) + (c + lc)]; 
+							unsigned val = this->_accu.accumulator[((r + lr) *this->_accu.width) + (c + lc)]; 
 							if ( val > max) {
 								max = val;
 								lr = lc = 5; // escape the local search window

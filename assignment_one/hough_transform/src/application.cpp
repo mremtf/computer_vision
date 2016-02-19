@@ -21,11 +21,11 @@ int main (int argc, char** argv) {
 	int radius = atoi(argv[3]);
 
   /// Load an image
-	cv::Mat src = cv::imread( argv[1]);
+	cv::Mat src = cv::imread( argv[1], 1);
 
-	cv::Mat src_gray;
+	cv::Mat src_gray = src;
 	/// Convert it to gray to 1 channel image
-  cv::cvtColor( src, src_gray, cv::COLOR_RGB2GRAY );
+  //cv::cvtColor( src, src_gray, cv::COLOR_RGB2GRAY );
 
   if( src_gray.empty() )
   { 
@@ -34,18 +34,23 @@ int main (int argc, char** argv) {
 		
 	}
 
-	if (src_gray.channels() != 1) {
+	/*if (src_gray.channels() != 1) {
 		std::cout << "ERROR failed to convert to 1 channel image" << std::endl;
 		return -1;
-	}
+	}*/
 	cv::Mat img_blurred;
 	cv::Mat img_edges;	
 	cv::Mat img_res = src.clone();
-	cv::blur( src_gray, img_blurred, cv::Size(5,5) );
-	cv::Canny(img_blurred, img_edges, 80, 120, 3);
+	cv::blur( src_gray, img_blurred, cv::Size(3,3) );
+	cv::Canny(img_blurred, img_edges, 100, 150, 3);
+
+	if (img_edges.channels() != 1) {
+		std::cout << "not a one band image :(" << std::endl;
+		return -1;
+	}
 
 	hough_transform ht(img_edges.size());
-	if (ht.transform(img_edges,200) != 0) {
+	if (ht.transform(img_edges,250) != 0) {
 		std::cout << "Transform Failed" << std::endl;
 		return -1;
 	}
@@ -55,10 +60,11 @@ int main (int argc, char** argv) {
 	std::vector<std::pair<cv::Point,cv::Point> >::iterator it;
 	it = lines.begin();
 	for (; it != lines.end(); ++it) {
-		cv::line(img_res,it->first,it->second, cv::Scalar(0,0,255), 2,8);
+		cv::line(img_res,it->second,it->first, cv::Scalar(0,0,255), 2,8);
 	}
 
 	Accumulator accum = ht.accumulator();
+
 	const unsigned int size = accum.height * accum.width;
 	int max = 0;
 	for(int v=0; v < size;v++)
