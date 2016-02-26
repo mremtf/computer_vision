@@ -1,3 +1,6 @@
+/*
+* Matthew England
+*/
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
@@ -116,7 +119,7 @@ Mat get_window_sum (Mat &m, int window_radius) {
 * takes the input images and the desired window radius
 * returns the u and v generated from the image 
 */
-void get_lucas_kanade_optical_flow(Mat &img1, Mat &img2, int window_radius, Mat &u, Mat &v){
+void calc_lucas_kanade_optical_flow(Mat &img1, Mat &img2, int window_radius, Mat &u, Mat &v){
 
 		// Calculate the first derivatives of the image for x,y, and time
     Mat fx = get_fx(img1, img2);
@@ -124,20 +127,20 @@ void get_lucas_kanade_optical_flow(Mat &img1, Mat &img2, int window_radius, Mat 
     Mat ft = get_ft(img1, img2);
 
 		// Calculate the partial derivates
-    Mat fx2 = fx.mul(fx);
-    Mat fy2 = fy.mul(fy);
-    Mat fxfy = fx.mul(fy);
-    Mat fxft = fx.mul(ft);
-    Mat fyft = fy.mul(ft);
+    Mat fx2 = fx.mul(fx); //Ix^2
+    Mat fy2 = fy.mul(fy); //Iy^2
+    Mat fxfy = fx.mul(fy); // Ixy
+    Mat fxft = fx.mul(ft); // Ixt
+    Mat fyft = fy.mul(ft); // Iyt
 
 
 
     // Get the sum of the windows
-		Mat sum_fx2 = get_window_sum(fx2,window_radius);
-    Mat sum_fy2 = get_window_sum(fy2,window_radius);
-    Mat sum_fxft = get_window_sum(fxft,window_radius);
-    Mat sum_fxfy = get_window_sum(fxfy,window_radius);
-    Mat sum_fyft = get_window_sum(fyft,window_radius);
+		Mat sum_fx2 = get_window_sum(fx2,window_radius); // sum Ix^2
+    Mat sum_fy2 = get_window_sum(fy2,window_radius); // sum Iy^2
+    Mat sum_fxft = get_window_sum(fxft,window_radius); // sum Ixy
+    Mat sum_fxfy = get_window_sum(fxfy,window_radius); // sum Ixt
+    Mat sum_fyft = get_window_sum(fyft,window_radius); // sum Iyt
 
 		// Does the least squares method	
     Mat tmp = sum_fx2.mul(sum_fy2) - sum_fxfy.mul(sum_fxfy);
@@ -187,7 +190,7 @@ int main(int argc, char** argv){
   Mat u = Mat::zeros(img1.rows, img1.cols, CV_64FC1);
   Mat v = Mat::zeros(img1.rows, img1.cols, CV_64FC1);
   
-	get_lucas_kanade_optical_flow(img1, img2, window_radius,u, v);
+	calc_lucas_kanade_optical_flow(img1, img2, window_radius,u, v);
 
 	 /*Create the Vector Arrows on the input image*/
    IplImage temp_u = u;
