@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+project(optical_flow)
+find_package(OpenCV REQUIRED)
+set(CMAKE_CXX_FLAGS "-std=c++0x -Wall -Werror -g")
+add_executable(${PROJECT_NAME} src/application.cpp src/optical_flow.cpp)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
