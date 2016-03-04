@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 2.8)
+project(multi_view_optical_flow)
+find_package(OpenCV REQUIRED)
+set(CMAKE_CXX_FLAGS "-std=c++0x -Wall -Werror -g")
+add_executable(${PROJECT_NAME} src/application.cpp)
+add_executable(harris_corner_detector src/harris_corner_detector.cpp)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+target_link_libraries(harris_corner_detector ${OpenCV_LIBS})
