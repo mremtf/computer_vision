@@ -13,7 +13,8 @@ using namespace cv;
 using namespace std;
 
 
-
+//https://gist.github.com/wzpan/8996603
+//https://github.com/gokhanozbulak/Harris-Detector/blob/master/src/harris.m
 
 int main (int argc, char** argv) {
 	if (argc < 2) {
