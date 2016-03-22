@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+project(harris_corner_feature_tracking)
+find_package(OpenCV REQUIRED)
+set(CMAKE_CXX_FLAGS "-std=c++0x -Wall -g")
+add_executable(${PROJECT_NAME} src/application.cpp)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
